@@ -20,7 +20,7 @@ And let's get going! 🚀
 > ```
 
 > [!IMPORTANT]
-> We re recommend you write all commands below by hand, i.e. without using copy & paste.
+> We recommend you write all commands below by hand, i.e. without using copy & paste.
 > This will get you better accustomed to GitHub-related commands.
 
 ## View GitHub Repositories
@@ -319,7 +319,7 @@ Before this, do a reset of your repository:
 
 Each of you should do the following:
 
-1. Create of fork of the other's repository.
+1. Create a fork of the other's repository.
    Be sure to give it a different name, not to clash with your own `workshop-github` repository name.
 
 1. Clone the fork locally:
