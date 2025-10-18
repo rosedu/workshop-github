@@ -2,7 +2,7 @@
 
 # Check for GitHub CLI command.
 if ! command -v gh > /dev/null 2>&1; then
-    echo "gh could not be found" 1>&2
+    echo "gh Could Not Be Found" 1>&2
     exit 1
 fi
 
