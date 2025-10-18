@@ -2,7 +2,8 @@
 
 int main(void)
 {
-	puts("Hello from Unikraft!");
+	puts("Hello from Unikraft!\n");
+	puts("hello from Miki");
 
 	return 0;
 }
