@@ -1,3 +1,0 @@
-$(eval $(call addlib,appcbye))
-
-APPCHELLO_SRCS-y += $(APPCHELLO_BASE)/bye.c
