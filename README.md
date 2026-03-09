@@ -1,7 +1,7 @@
 # GitHub Workshop
 
 This is a practical workshop consisting of common GitHub-related actions.
-It is based on the [`unikraft/catalog-core` repository](https://github.com/unikraft/catalog-core), giving us a concrete Git repository to screw up ... hmmmm ... to do wonderful amazing great things to.
+It is based on the [`unikraft/catalog-core` repository](https://github.com/unikraft/catalog-core), giving us a concrete Git repository ~~to screw up~~ to do wonderful amazing great things to.
 
 First of all, clone the [repository](https://github.com/rosedu/workshop-github):
 
@@ -23,20 +23,14 @@ And let's get going! 🚀
 > We recommend you write all commands below by hand, i.e. without using copy & paste.
 > This will get you better accustomed to GitHub-related commands.
 
-## View GitHub Repositories
+## View GitHub Repository
 
-Take a look at the following repositories:
+Let's do a quick tour of a popular GitHub repository: [`unikraft/unikraft`](https://github.com/unikraft/unikraft)
 
-- [`unikraft/unikraft`](https://github.com/unikraft/unikraft)
-- [`microsoft/openvmm`](https://github.com/microsoft/openvmm)
-- [`nodejs/node`](https://github.com/nodejs/node)
-
-Do a tour of as much information as possible about them:
-
+From the main repository page, we can:
 - See statistics about the programming languages used.
 - See information about contributors.
 - See number of stars and number of forks.
-- Take a quick look at the issues and pull requests.
 
 ### View Projects
 
@@ -50,16 +44,12 @@ Browse different views (tabs) in the projects.
 ### View Pull Requests
 
 Take a look at [pull requests in the `unikraft` repository](https://github.com/unikraft/unikraft/pulls).
-Select 3 pull requests and check them out.
-Look at the discussions, changes, checks for each pull request.
+Check out a few of them. Can you find one connected to an issue?
 
-Identify a pull request that is connected to an issue.
-
-Select pull requests that have been authored by `michpappas`.
-
-Select pull requests that are to be reviewed by `michpappas`.
-
-Select pull requests that use the `area/plat` label.
+Try filtering pull requests:
+- authored by `michpappas`
+- to be reviewed by `michpappas`
+- that have the `area/plat` label.
 
 ## Set Up GitHub
 
@@ -88,51 +78,20 @@ gh auth login
 
 Use the username and the personal access token above to authenticate.
 
-### Use GitHub CLI
-
-Then clone the three repositories above:
-
-```console
-git clone https://github.com/unikraft/unikraft
-git clone https://github.com/microsoft/openvmm
-git clone https://github.com/nodejs/node
-```
-
-For each repository, use the GitHub CLI tool to:
-
-- List repository issues:
-
-  ```console
-  gh issue list
-  ```
-
-- List repository pull requests:
-
-  ```console
-  gh pr list
-  ```
-
-- List repository pull requests whose state is `closed`:
-
-  ```console
-  gh pr list -s closed
-  ```
-
-- View details about a pull request:
-
-  ```console
-  gh pr view <PR_ID>
-  ```
-
-  where `<PR_ID>` is the PR number.
-
 ## Create Work GitHub Repository
+
+> [!NOTE]
+> Before you move on to this next step, make sure you have `unzip` installed.
+>
+> ```console
+> sudo apt install unzip
+> ```
 
 Let's first create a work GitHub repository based on the current repository.
 We will use it for toying around, messing it up and fixing it.
 
 First, make sure you are in the local directory clone of this repository (`workshop-github`).
-Then, create a repository on GitHub from the command line (using GitHub CLI - `gh`):
+Then, create a repository on GitHub:
 
 ```console
 ./gh-create-repo.sh
@@ -159,7 +118,7 @@ We do the steps:
 1. Create a branch for the new pull request:
 
    ```console
-   git checkout -b add-c-bye
+   git checkout -b <your-branch-name>
    ```
 
 1. Create the contents of the `c-bye` program:
@@ -178,28 +137,16 @@ We do the steps:
 1. Push commit to the `upstream` remote:
 
    ```console
-   git push upstream add-c-bye
+   git push upstream <your-branch-name>
    ```
 
 1. Create a pull request by clicking on the URL that was printed by the command above.
    You will end up having a pull request created in the repository.
-   The pull request is requesting for a merge to happen from the `add-c-bye` to `main`.
-
-### Do It Yourself
-
-1. Repeat the above steps at least 2 more times.
-   Reset before each step:
-
-   ```console
-   ./gh-reset-repo.sh
-   ```
-
-1. Do the same steps as above for the `cpp-bye` and `python3-bye` programs in the `support/` directory.
-   You should end up with three pull requests.
+   The pull request is requesting for a merge to happen from the `<your-branch-name>` to `main`.
 
 ## Review and Merge Pull Requests
 
-The pull requests should be reviewed and merged.
+The pull request should be reviewed and merged.
 For that, in the GitHub web interface for the pull request follow the steps:
 
 1. Go to the `Files changed` tab.
@@ -217,21 +164,382 @@ For that, in the GitHub web interface for the pull request follow the steps:
 
 ### Do It Yourself
 
-1. Do the steps above for all 3 pull requests.
-
 1. Now reset the repository:
 
    ```console
    ./gh-reset-repo.sh
    ```
 
-   and redo the pull requests, and merge them again.
 
 1. Create your own commits and pull requests.
    Be creative.
 
    Create at least one pull request with two commits.
    Use the `Squash and merge` merge strategy.
+
+## Understand `git merge` and `git rebase`
+
+When working with multiple branches, we often need to bring changes from one branch into another.
+The two most common ways to do this are:
+
+* `git merge`
+* `git rebase`
+
+> [!IMPORTANT]
+> They both integrate changes, but they do it differently.
+
+> [!NOTE]
+> In all examples below, use this command often to inspect the commit graph:
+> `git log --oneline --graph --all`
+
+## What is `git merge`?
+
+`git merge` combines the histories of two branches.
+When the two branches have diverged, Git usually creates a merge commit.
+
+## Practical example: `git merge`
+
+First, reset the repository:
+
+   ``` console
+   ./gh-reset-repo.sh
+   ```
+
+Make sure you are on `main || master` branch:
+
+   ``` console
+   git switch `main or master`
+   ```
+
+Verify that you are on the main branch:
+
+   ``` console
+   git branch
+   ```
+
+Create a new branch:
+
+   ``` console
+   git switch -c <your-merge-branch-name>
+   ```
+
+Verify that you are on the newly created branch:
+
+   ``` console
+   git branch
+   ```
+
+Create a first commit on this branch:
+
+   ``` console
+   mkdir merge-demo
+   echo "first line" > merge-demo/notes.txt
+   git add merge-demo/notes.txt
+   git commit -m "Add first note in merge example"
+   ```
+
+Create a second commit on the same branch:
+
+   ``` console
+   echo "second line" >> merge-demo/notes.txt
+   git add merge-demo/notes.txt
+   git commit -m "Add second note in merge example"
+   ```
+
+Visualize the history:
+
+``` console
+git log --oneline --graph --all
+```
+
+At this point, the history should still be simple: `<your-merge-branch-name>` is ahead of `main` branch.
+
+Now switch back to `main` branch and create a commit there too:
+
+   ``` console 
+   git switch main
+   mkdir main-demo
+   echo "change on main" > main-demo/main.txt
+   git add main-demo/main.txt
+   git commit -m "Add change on main branch"
+   ```
+
+Visualize the history again:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+Now the two branches have diverged:
+
+* main has one new commit
+
+* `<your-merge-branch-name>` has two different commits
+
+Merge `<your-merge-branch-name>` into `main`:
+
+   ``` console 
+   git merge <your-merge-branch-name>
+   ```
+
+Visualize the history once more:
+
+``` console 
+git log --oneline --graph --all
+```
+
+You should now see a graph similar to this:
+
+``` text
+The history:
+
+*   M Merge branch `<your-merge-branch-name>`
+|\
+| * C Add second note in merge example
+| * B Add first note in merge example
+* | D Add change on main branch
+|/
+* A previous commit
+```
+
+### What happened?
+`git merge` took the changes from `<your-merge-branch-name>` and integrated them into `main` branch.
+Because both branches had moved forward independently, Git created a `merge commit`.
+
+### What is important here?
+* the branch structure is preserved
+* the history shows exactly that parallel work happened
+* nothing was rewritten
+
+### Now you want to erase all the commits that you have created so far from both branches.
+
+Go to `<your-merge-branch-name>` and delete the commits that you created using:
+
+   ```console
+   git switch <your-merge-branch-name>
+   git reset --hard HEAD~n
+   ```
+Replace n with the number of commits you created on this branch.
+
+After that, visualize the log:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+Do the same on the main branch.
+
+   ``` console
+   git switch main
+   git reset --hard HEAD~n
+   ```
+
+Again, replace n with the number of commits you created on the main branch.
+
+Verify the result:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+## What is `git rebase`?
+
+`git rebase` takes the commits from one branch and `replays them on top of another branch`,
+creating new commits that appear after the target branch.
+
+## Practical example: `git rebase`
+
+Reset the repository again:
+
+   ``` console
+   ./gh-reset-repo.sh
+   ```
+
+Make sure you are on `main`:
+
+   ``` console
+   git switch main
+   ```
+
+Verify that you are on the main branch:
+
+   ``` console
+   git branch
+   ```
+
+Create a new branch:
+
+   ``` console
+   git switch -c <your-rebase-branch-name>
+   ```
+
+Verify that you are on the newly created branch:
+
+   ``` console
+   git branch
+   ```
+
+Create the first commit on this branch:
+
+   ``` console
+   mkdir rebase-demo
+   echo "first line" > rebase-demo/notes.txt
+   git add rebase-demo/notes.txt
+   git commit -m "Add first note in rebase example"
+   ```
+
+Create the second commit on this branch:
+
+   ``` console
+   echo "second line" >> rebase-demo/notes.txt
+   git add rebase-demo/notes.txt
+   git commit -m "Add second note in rebase example"
+   ```
+
+Visualize the history:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+Now switch to `main` branch and create a commit there:
+
+   ``` console
+   git switch main
+   mkdir main-demo
+   echo "change on main" > main-demo/main.txt
+   git add main-demo/main.txt
+   git commit -m "Add change on main branch"
+   ```
+
+Visualize again:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+> [!IMPORTANT] At this point, just like before, the branches have diverged.
+
+Now switch back to `<your-rebase-branch-name>`:
+
+   ``` console
+   git switch <your-rebase-branch-name>
+   ```
+
+Verify that you are on the newly created branch:
+
+   ``` console
+   git branch
+   ```
+
+Rebase it on top of `main`:
+
+   ``` console
+   git rebase main
+   ```
+
+Visualize the history again:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+You should now see a history similar to this:
+
+   ``` text
+   The history:
+
+   * E Add second note in rebase example
+   |
+   * D Add first note in rebase example
+   |
+   * C Add change on main branch
+   |
+   * B previous commit
+   |
+   * A older commit
+   ```
+
+### What happened?
+
+Git took the two commits from `<your-rebase-branch-name>` and replayed them on top of the current `main` branch.
+
+So instead of:
+
+   ``` console
+   main:    A---B---C
+                  \
+   your-branch:    D---E
+   ```
+
+you now get:
+
+   ``` console
+      main:         A---B---C
+      your-branch:          D'---E'
+   ```
+
+> [!IMPORTANT] D' and E' are new commits created by `rebase`.
+They may contain the same changes, but they are rewritten commits.
+
+### What is important here?
+* git rewrites commit history
+* the result looks like the work happened in a straight line
+* there is usually no merge commit
+
+
+### Now you want to remove all the commits created during this rebase exercise.
+
+After the rebase, the commits created during this exercise are still on `<your-rebase-branch-name>`, but they were rewritten on top of `main`.
+
+First, go to `<your-rebase-branch-name>` and delete the rebased commits that you created:
+
+   ```console
+   git switch <your-rebase-branch-name>
+   git reset --hard HEAD~n
+   ```
+Replace n with the number of commits you created on this branch.
+
+After that, visualize the log:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+Now switch to the `main` branch and delete the commit that you created there:
+
+   ``` console
+   git switch main
+   git reset --hard HEAD~n
+   ```
+
+Replace n with the number of commits you created on the main branch during this exercise.
+
+Visualize the history again:
+
+   ``` console
+   git log --oneline --graph --all
+   ```
+
+If needed, delete `<your-rebase-branch-name>` as well:
+
+   ``` console
+   git branch -D <your-rebase-branch-name>
+   ```
+
+## Configure Merge Strategy
+
+We want to configure Rebase and merge as the only merge strategy.
+
+For that, do the steps:
+
+1. Go in the `Settings` tab in web view of your GitHub repository.
+
+1. Go to the `Pull Requests` session.
+
+1. Uncheck `Allow merge` commits and `Allow squash merging`.
+
+Now create a new pull request and see that the only option for merging is `Rebase and merge`.
 
 ## Approve Pull Request
 
@@ -291,20 +599,6 @@ For this, do the following:
 1. Now ask for an approval for your pull request, as above.
 
 1. Merge the pull request with the approval now done.
-
-## Configure Merge Strategy
-
-We want to configure `Rebase and merge` as the only merge strategy.
-
-For that, do the steps:
-
-1. Go in the `Settings` tab in web view of your GitHub repository.
-
-1. Go to the `Pull Requests` session.
-
-1. Uncheck `Allow merge` commits and `Allow squash merging`.
-
-Now create a new pull request and see that the only option for merging is `Rebase and merge`.
 
 ## Collaborate with GitHub
 
