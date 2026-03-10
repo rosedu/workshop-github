@@ -118,7 +118,7 @@ We do the steps:
 1. Create a branch for the new pull request:
 
    ```console
-   git checkout -b <your-branch-name>-c-bye
+   git checkout -b <your-branch-name>
    ```
 
 1. Create the contents of the `c-bye` program:
@@ -137,12 +137,12 @@ We do the steps:
 1. Push commit to the `upstream` remote:
 
    ```console
-   git push upstream <your-branch-name>-c-bye
+   git push upstream <your-branch-name>
    ```
 
 1. Create a pull request by clicking on the URL that was printed by the command above.
    You will end up having a pull request created in the repository.
-   The pull request is requesting for a merge to happen from the `<your-branch-name>-c-bye` to `main`.
+   The pull request is requesting for a merge to happen from the `<your-branch-name>` to `main`.
 
 ## Review and Merge Pull Requests
 
