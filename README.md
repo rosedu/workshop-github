@@ -177,13 +177,13 @@ For that, in the GitHub web interface for the pull request follow the steps:
    Create at least one pull request with two commits.
    Use the `Squash and merge` merge strategy.
 
-## Understand git merge and git rebase
+## Understand `git merge` and `git rebase`
 
 When working with multiple branches, we often need to bring changes from one branch into another.
 The two most common ways to do this are:
 
-* git merge
-* git rebase
+* `git merge`
+* `git rebase`
 
 > [!IMPORTANT]
 > They both integrate changes, but they do it differently.
