@@ -1,6 +1,6 @@
-# GitHub Workshop
+# Git Advanced & GitHub Workshop
 
-This is a practical workshop consisting of common GitHub-related actions.
+This is a practical workshop consisting of common Git Advanced & GitHub-related actions.
 It is based on the [`unikraft/catalog-core` repository](https://github.com/unikraft/catalog-core), giving us a concrete Git repository to screw up ... hmmmm ... to do wonderful amazing great things to.
 
 First of all, clone the [repository](https://github.com/rosedu/workshop-github):
@@ -12,11 +12,691 @@ cd workshop-github/
 
 And let's get going! 🚀
 
+## Set Up GitHub
+
+Let's set up GitHub for proper use.
+
+### Add Your Public SSH Key
+
+If you haven't already, add your public SSH key to your GitHub account.
+Follow the instructions [here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
+
+### Create a Personal Access Token
+
+Create a personal access token to use as an authentication mechanism for GitHub.
+Follow the instructions [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic).
+Add **all permissions** to the personal access token.
+
+## Set Up GitHub CLI
+
+Follow the instruction [here](https://cli.github.com/) and install GitHub CLI.
+
+Authenticate to GitHub:
+
+```console
+gh auth login
+```
+
+Use the username and the personal access token above to authenticate.
+
+## Create Work GitHub Repository
+
+Let's first create a work GitHub repository based on the current repository.
+We will use it for toying around, messing it up and fixing it.
+
+First, make sure you are in the local directory clone of this repository (`workshop-github`).
+Then, create a repository on GitHub from the command line (using GitHub CLI - `gh`):
+
+```console
+./gh-create-repo.sh
+```
+
+Check your repository on GitHub using a web browser.
+
+Your repository is now available as the `upstream` remote.
+Check your remotes:
+
+```console
+git remote show
+git remote show origin
+git remote show upstream
+```
+
+# Git Advanced
+
 > [!NOTE]
 > If, at any point in time, you miss a command, or something bad simply happened, reset the environment by running:
 >
 > ```console
-> ./gh-reset-repo.sh
+> ./reset-all.sh
+> ```
+
+> [!IMPORTANT]
+> We recommend you write all commands below by hand, i.e. without using copy & paste.
+> This will get you better accustomed to Git and Git commands.
+
+## Edit Commit History
+
+Let's get to a situation where we need to repair the commit history.
+We will have a setup where we have the following stack of commits:
+
+- (top) correct commit
+- (next) commit that shouldn't exist (`bla bla` commit)
+- (next-next) commit with a typo (`Bue` instead of `Bye`)
+
+We want to edit the commit history and:
+
+- Remove the `bla bla` commit.
+- Fix the typo.
+
+First, let's create the local branches we will work on (`base`, `scripts`, `test`).
+They live on the remote, so we just check them out once to get local tracking branches:
+
+```console
+git checkout base
+git checkout scripts
+git checkout test
+git checkout main
+```
+
+1. Create the setup:
+
+   ```console
+   ./set-up-history-edit.sh
+   git status
+   git log
+   ```
+
+1. **Note**: If, at any point in time, you miss a command, or something bad simply happened, reset the environment by running:
+
+   ```console
+   ./reset-all.sh
+   ```
+
+   Then go back to step 1 and prepare the messed up environment again.
+
+1. Go into commit history editing mode:
+
+   ```console
+   git rebase -i HEAD~3
+   ```
+
+   The `rebase` command positions you somewhere else in the commit history.
+   You can make updates to commits from that point onward.
+
+   The `~N` construct is a reference to `N` commits before the current one.
+   `HEAD~3` means 3 commits before the top commit.
+
+   You get an editor screen with an output like this:
+
+   ```text
+   pick e5442f0 Add C Bue application
+   pick 06eb1fa bla bla
+   pick 74f3d3e c-bye: Add Firecracker build script for x86_64
+   ```
+
+1. Edit the rebase screen contents in order to edit the commit with the typo (`Bue` instead of `Bye`) and to drop the extra commit (the one with `bla bla`).
+   Have the editor screen have the contents:
+
+   ```
+   edit e5442f0 Add C Bue application
+   drop 06eb1fa bla bla
+   pick 74f3d3e c-bye: Add Firecracker build script for x86_64
+   ```
+
+   That is, the first line (the bad commit message) should have `edit` instead of `pick` - we edit the commit.
+   And the second line (the extra commit) should have `drop` instead of `pick` - we drop the commit.
+
+   Save and exit the editor screen.
+
+1. We are currently editing the typo commit:
+
+   ```console
+   git log
+   git show
+   ```
+
+1. Update the commit message from `Bue` to `Bye`:
+
+   ```console
+   git log
+   git commit --amend    # do edit as required
+   git log
+   git show
+   ```
+
+1. Continue the commit history editing:
+
+   ```console
+   git rebase --continue
+   ```
+
+   Each `git rebase --continue` command gets you to the next commit to update.
+
+1. The extra commit has been dropped:
+
+   ```console
+   git log
+   git status
+   ```
+
+1. The commit history editing (aka the rebase) is done:
+
+   ```console
+   git rebase --continue
+   ```
+
+   It says "No rebase in progress?", meaning the rebase is done.
+   There are no more commits to update.
+
+### Do It Yourself
+
+1. Repeat the above steps at least 2 more times.
+
+   Aim to have one time without checking the instructions.
+   That is, run the `./set-up-history-edit.sh` script and then repair the commit history by yourself.
+
+   If, at any point, you get lost, run the reset script:
+
+   ```console
+   ./reset-all.sh
+   ```
+
+1. Do your own commit history that you want to edit.
+   Go to a given branch, create commits, create some bad or extra commits.
+   Then repair the commit history.
+
+   If, at any point, you get lost, run the reset script:
+
+   ```console
+   ./reset-all.sh
+   ```
+
+## Create Commits - Recap from the previous workshop
+
+We will get some new content that we will add as commits to the repository.
+Make sure you are on the `main` branch and everything is clean:
+
+```console
+git checkout main
+```
+
+Or, reset the repository:
+
+```console
+./reset-all.sh
+```
+
+1. Create contents from archive:
+
+   ```console
+   unzip support/c-bye.zip
+   git status
+   ```
+
+   We now have a `c-bye/` directory:
+
+   ```console
+   ls c-bye/
+   ```
+
+   There are a lot of files.
+   We want to add them as 3 separate commits in 3 separate branches.
+
+   1. The `bye.c`, `Makefile`, `Makefile.uk`, `fc...`, `xen...`, `README.md` files will go to the `base` branch.
+   1. The `defconfig...`, `build...`, `run...`, `README.scripts.md` files will go to the `scripts` branch.
+   1. The `test...` files will go to the `test` branch.
+
+1. Go to the `c-bye/` directory:
+
+   ```console
+   cd c-bye/
+   ls
+   ```
+
+### `base` branch
+
+Let's create a commit to `base` branch:
+
+1. Check out the `base` branch:
+
+   ```console
+   git checkout base
+   ```
+
+1. Add contents to staged area:
+
+   ```console
+   git add bye.c Makefile Makefile.uk README.md xen.* fc.* .gitignore
+   git status
+   ```
+
+1. Create the commit:
+
+   ```console
+   git commit -s -m 'Introduce C Bye on Unikraft'
+   ```
+
+1. List the commit:
+
+   ```console
+   git log
+   git show
+   ```
+
+1. Look at the commit for the initial C Hello program:
+
+   ```console
+   git show 7fd6e9290dddc2ae799ae5df684668a7d16e87f3
+   ```
+
+   The commit message is:
+
+   ```text
+   Introduce C Hello on Unikraft
+
+   Add `c-hello/` directory:
+
+   - `hello.c`: the source code file
+   - `Makefile.uk`: defining the source code files used
+   - `Makefile`: for building the application
+   - `fc.x86_64.json` / `fc.arm64.json`: Firecracker configuration
+   - `xen.x86_64.cfg` / `xen.arm64.cfg`: Xen configuration
+   - `README.md`: instructions
+   - `.gitignore`: ignore generated files
+   ```
+
+   We want something similar for our C bye commit.
+
+1. Update the commit message by amending:
+
+   ```console
+   git commit --amend
+   ```
+
+   You get an editable screen.
+   Edit the commit message to have contents similar to the one for C Hello.
+   Use copy & paste.
+
+   You can use `git commit --amend` to constantly update the commit.
+
+   See the final result with:
+
+   ```console
+   git log
+   git show
+   ```
+
+### `scripts` branch
+
+Let's create a commit to `scripts` branch:
+
+1. Check out the `scripts` branch:
+
+   ```console
+   git checkout scripts
+   ```
+
+1. Add contents to staged area:
+
+   ```console
+   git add defconfig.* build.* run.* README.scripts.md
+   git status
+   ```
+
+1. Create the commit:
+
+   ```console
+   git commit -s -m 'c-bye: Add scripts'
+   ```
+
+1. List the commit:
+
+   ```console
+   git log
+   git show
+   ```
+
+1. Look at the commit for the initial C Hello program:
+
+   ```console
+   git show 04cf0f57f2853d73a5c25082d4652fef63da8f57
+   ```
+
+   The commit message is:
+
+   ```text
+   c-hello: Add scripts
+
+   Use scripts as quick actions for building and running C Hello on Unikraft.
+
+    - `defconfig.<plat>.<arch>`: default configs, used by build scripts
+    - `build.<plat>.<arch>`: scripts for building Unikraft images
+    - `run.<plat>.<arch>`: scripts for running Unikraft images
+    - `README.script.md`: companion README with instructions
+   ```
+
+   We want something similar for our C bye commit.
+
+1. Update the commit message by amending:
+
+   ```console
+   git commit --amend
+   ```
+
+   You get an editable screen.
+   Edit the commit message to have contents similar to the one for C Hello.
+   Use copy & paste.
+
+   You can use `git commit --amend` to constantly update the commit.
+
+   See the final result with:
+
+   ```console
+   git log
+   git show
+   ```
+
+### `test` branch
+
+Let's create a commit to `test` branch:
+
+1. Check out the `test` branch:
+
+   ```console
+   git checkout test
+   ```
+
+1. Add contents to staged area:
+
+   ```console
+   git add test*
+   git status
+   ```
+
+1. Create the commit:
+
+   ```console
+   git commit -s -m 'c-bye: Add test scripts'
+   ```
+
+1. List the commit:
+
+   ```console
+   git log
+   git show
+   ```
+
+### Do It Yourself
+
+1. Reset the configuration:
+
+   ```console
+   ./reset-all.sh
+   ```
+
+1. Repeat the above steps at least 2 more times.
+
+   Aim to have one time without checking the instructions.
+   That is, create the 3 commits in the 3 branches for C bye.
+
+   If, at any point, you get lost, run the reset script:
+
+   ```console
+   ./reset-all.sh
+   ```
+
+1. Do the same for the C++ Bye program.
+
+   Make sure you are on the `main` branch:
+
+   ```console
+   git status
+   git checkout main
+   ```
+
+   First unpack the contents:
+
+   ```console
+   unzip support/cpp-bye.zip
+   git status
+   ```
+
+   We now have a `cpp-bye/` directory:
+
+   ```console
+   ls cpp-bye/
+   ```
+
+   There are a lot of files.
+   We want to add them as 3 separate commits in 3 separate branches.
+
+   1. The `bye.cpp`, `Makefile`, `Makefile.uk`, `Config.uk`, `fc...`, `xen...`, `README.md` files will go to the `base` branch.
+   1. The `defconfig...`, `build...`, `run...`, `README.scripts.md` files will go to the `scripts` branch.
+   1. The `test...` files will go to the `test` branch.
+
+   Follow the steps for C Bye to create the commits for C++ Bye.
+
+1. Do the same for the Python Bye program.
+
+   Make sure you are on the `main` branch:
+
+   ```console
+   git status
+   git checkout main
+   ```
+
+   First unpack the contents:
+
+   ```console
+   unzip support/python3-bye.zip
+   git status
+   ```
+
+   We now have a `python3-bye/` directory:
+
+   ```console
+   ls python3-bye/
+   ```
+
+   There are a lot of files.
+   We want to add them as 3 separate commits in 3 separate branches.
+
+   1. The `bye.py`, `Makefile`, `Makefile.uk`, `Config.uk`, `fc...`, `xen...`, `README.md` files will go to the `base` branch.
+   1. The `defconfig...`, `build...`, `run...`, `README.scripts.md` files will go to the `scripts` branch.
+   1. The `test...` files will go to the `test` branch.
+
+   Follow the steps for C bye to create the commits for Python3 Bye.
+
+## Create Commit History
+
+At this point there are commits in the `base` branch that are not part of the `scripts` branch.
+And there are commits in the `scripts` branch that are not part of the `test` branch.
+
+We aim to have the `scripts` branch built on top of the `base` branch.
+And we want to have the `test` branch built on top of the `scripts` branch.
+
+For this, all commits from the `base` branch will have to be on the `scripts` branch.
+And all commits from the `scripts` branch will have to be on the `test` branch.
+
+1. To get the `c-bye` commit from the `base` branch to the `scripts` branch, first check out the `scripts` branch:
+
+   ```console
+   git checkout scripts
+   ```
+
+1. Find out the commit ID in the `base` branch:
+
+   ```console
+   git log base
+   ```
+
+   Scroll the commit history and copy the commit ID belonging to the `c-bye` program.
+   That is, the ID of the commit you created earlier with the message: `Introduce C Bye on Unikraft`.
+
+1. Use the commit ID cherry pick the commit from the `base` branch to the `scripts` branch:
+
+   ```console
+   git cherry-pick <commit-id>
+   ```
+
+   Replace `<commit-id>` with the commit ID you copied above (copy & paste).
+
+1. Check the updated history of the `scripts` branch:
+
+   ```console
+   git log
+   ```
+
+1. To get the `c-bye` commits from the `scripts` branch to the `test` branch, first check out the `test` branch:
+
+   ```console
+   git checkout test
+   ```
+
+1. First cherry pick the `base` commit that is now on `scripts`:
+
+   ```console
+   git cherry-pick <commit-id>
+   ```
+
+   This is the same commit ID from above.
+
+   **Cherry-picking** is selecting a commit, or series of commits and adding them on top of the current setup.
+
+1. Now let's get the `c-bye` commit from the `scripts` branch.
+   Find out the commit ID in the `scripts` branch:
+
+   ```console
+   git log scripts
+   ```
+
+   Scroll the commit history and copy the commit ID belonging to the `c-bye` program.
+   That is, the ID of the commit you created earlier with the message: `c-bye: Add scripts`.
+
+1. Use the commit ID cherry pick the commit from the `scripts` branch to the `test` branch:
+
+   ```console
+   git cherry-pick <new-commit-id>
+   ```
+
+   Replace `<new-commit-id>` with the commit ID you copied above (copy & paste).
+
+1. Check the updated history of the `scripts` branch:
+
+   ```console
+   git log
+   ```
+
+> [!NOTE]
+> If, at any point, you did something wrong, recall that you can drop the top commit by doing:
+>
+> ```console
+> git reset --hard HEAD^
+> ```
+
+### Do It Yourself
+
+1. Repeat the above steps at least 2 more times.
+
+   Aim to have one time without checking the instructions.
+   That is, have the `scripts` based on the `base` branch, and have the `test` branch based on the `scripts` branch.
+
+   For starters, drop the newly cherry-picked commit from the `scripts` branch:
+
+   ```console
+   git checkout scripts
+   git reset --hard HEAD^
+   ```
+
+   And drop the newly cherry-picked commits from the `test` branch:
+
+   ```console
+   git checkout test
+   git reset --hard HEAD^^
+   ```
+
+   Now repeat the steps above.
+
+1. Do the same steps for the C++ Bye program.
+   That is, have the `scripts` based on the `base` branch, and have the `test` branch based on the `scripts` branch.
+
+1. Do the same steps for the Python Bye program.
+   That is, have the `scripts` based on the `base` branch, and have the `test` branch based on the `scripts` branch.
+
+## Update Commit History
+
+At this point, the `scripts` branch is based on the `base` branch.
+And the `test` branch is based on the `scripts` branch.
+
+What we do not like, however, is that the commits in the `scripts` and the `test` branch are not in the correct order.
+
+In the `scripts` branch the commits are (top-to-bottom):
+
+- python3-bye: Add scripts
+- Introduce Python3 Bye
+- cpp-bye: Add scripts
+- Introduce C++ Bye
+- c-bye: Add scripts
+- Introduce C Bye
+- python3-bye: Add test scripts
+- cpp-bye: Add test scripts
+- c-bye: Add test scripts
+
+Use `git log` to confirm this:
+
+```console
+git log
+git log --oneline
+```
+
+The order we want is (top-to-bottom):
+
+- python3-bye: Add test scripts
+- python3-bye: Add scripts
+- Introduce Python3 Bye
+- cpp-bye: Add test scripts
+- cpp-bye: Add scripts
+- Introduce C++ Bye
+- c-bye: Add scripts
+- Introduce C Bye
+- c-bye: Add test scripts
+
+So, to update the commit history, follow the steps below:
+
+1. Enter the history update mode.
+   Update the last `9` commits:
+
+   ```console
+   git rebase -i HEAD~9
+   ```
+
+   You are now in a custom editor mode where you can update the commits.
+
+1. Move the commits (cut & paste) to get to the new commit history.
+   Do this by cutting and pasting the lines in the commit history.
+
+1. Save the custom editor mode.
+
+You're done.
+Check the new commit history with:
+
+```console
+git log
+git log --oneline
+```
+
+### Do It Yourself
+
+Edit the commit history on the `test` branch so the commits are in the correct order, just like they are on the `scripts` branch.
+
+# GitHub
+
+> [!NOTE]
+> If, at any point in time, you miss a command, or something bad simply happened, reset the environment by running:
+>
+> ```console
+> ./reset-all.sh --github
 > ```
 
 > [!IMPORTANT]
@@ -61,94 +741,6 @@ Select pull requests that are to be reviewed by `michpappas`.
 
 Select pull requests that use the `area/plat` label.
 
-## Set Up GitHub
-
-Let's set up GitHub for proper use.
-
-### Add Your Public SSH Key
-
-If you haven't already, add your public SSH key to your GitHub account.
-Follow the instructions [here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
-
-### Create a Personal Access Token
-
-Create a personal access token to use as an authentication mechanism for GitHub.
-Follow the instructions [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic).
-Add **all permissions** to the personal access token.
-
-## Set Up GitHub CLI
-
-Follow the instruction [here](https://cli.github.com/) and install GitHub CLI.
-
-Authenticate to GitHub:
-
-```console
-gh auth login
-```
-
-Use the username and the personal access token above to authenticate.
-
-### Use GitHub CLI
-
-Then clone the three repositories above:
-
-```console
-git clone https://github.com/unikraft/unikraft
-git clone https://github.com/microsoft/openvmm
-git clone https://github.com/nodejs/node
-```
-
-For each repository, use the GitHub CLI tool to:
-
-- List repository issues:
-
-  ```console
-  gh issue list
-  ```
-
-- List repository pull requests:
-
-  ```console
-  gh pr list
-  ```
-
-- List repository pull requests whose state is `closed`:
-
-  ```console
-  gh pr list -s closed
-  ```
-
-- View details about a pull request:
-
-  ```console
-  gh pr view <PR_ID>
-  ```
-
-  where `<PR_ID>` is the PR number.
-
-## Create Work GitHub Repository
-
-Let's first create a work GitHub repository based on the current repository.
-We will use it for toying around, messing it up and fixing it.
-
-First, make sure you are in the local directory clone of this repository (`workshop-github`).
-Then, create a repository on GitHub from the command line (using GitHub CLI - `gh`):
-
-```console
-./gh-create-repo.sh
-```
-
-Check your repository on GitHub using a web browser.
-
-Your repository is now available as the `upstream` remote.
-Check your remotes:
-
-```console
-git remote show
-git remote show origin
-git remote show upstream
-```
-
 ## Create Pull Requests
 
 Let's now create pull requests on our GitHub repository.
@@ -191,7 +783,7 @@ We do the steps:
    Reset before each step:
 
    ```console
-   ./gh-reset-repo.sh
+   ./reset-all.sh --github
    ```
 
 1. Do the same steps as above for the `cpp-bye` and `python3-bye` programs in the `support/` directory.
@@ -222,7 +814,7 @@ For that, in the GitHub web interface for the pull request follow the steps:
 1. Now reset the repository:
 
    ```console
-   ./gh-reset-repo.sh
+   ./reset-all.sh --github
    ```
 
    and redo the pull requests, and merge them again.
@@ -240,7 +832,7 @@ In order to approve a pull request, you need to have another user able to approv
 Before everything, reset the repository:
 
 ```console
-./gh-reset-repo.sh
+./reset-all.sh --github
 ```
 
 And create the pull request, as above.
@@ -270,7 +862,7 @@ We want to enforce an approval for our pull requests.
 Before everything, reset the repository:
 
 ```console
-./gh-reset-repo.sh
+./reset-all.sh --github
 ```
 
 And create the pull request, as above.
@@ -306,6 +898,43 @@ For that, do the steps:
 
 Now create a new pull request and see that the only option for merging is `Rebase and merge`.
 
+## Tag a Release
+
+A **tag** marks a specific commit in history, usually to flag a release or version (for example `v1.0`).
+Unlike a branch, a tag does not move - it always points to the same commit.
+
+1. Create an annotated tag on the current commit:
+
+   ```console
+   git tag -a v1.0 -m "First release of the C Bye application"
+   ```
+
+1. List the tags and inspect one:
+
+   ```console
+   git tag
+   git show v1.0
+   ```
+
+1. Push the tag to GitHub (tags are **not** pushed by `git push` by default):
+
+   ```console
+   git push origin v1.0
+   ```
+
+   To push all your tags at once, use `git push origin --tags`.
+
+1. In the web view of your GitHub repository, go to the `Tags` / `Releases` section.
+   You will see the `v1.0` tag.
+   From there you can also turn a tag into a published `Release`.
+
+To delete a tag (locally and on GitHub), use:
+
+```console
+git tag -d v1.0
+git push origin --delete v1.0
+```
+
 ## Collaborate with GitHub
 
 GitHub shines for collaborative / team work.
@@ -314,7 +943,7 @@ For this, work in pairs of two.
 Before this, do a reset of your repository:
 
 ```
-./gh-reset-repo.sh
+./reset-all.sh --github
 ```
 
 Each of you should do the following:
