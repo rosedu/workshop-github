@@ -243,7 +243,7 @@ Or, reset the repository:
    There are a lot of files.
    We want to add them as 3 separate commits in 3 separate branches.
 
-   1. The `bye.c`, `Makefile`, `Makefile.uk`, `fc...`, `xen...`, `README.md` files will go to the `base` branch.
+   1. The `bye.c`, `Makefile`, `Makefile.uk`, `fc...`, `xen...`, `README.md`, `.gitignore` files will go to the `base` branch.
    1. The `defconfig...`, `build...`, `run...`, `README.scripts.md` files will go to the `scripts` branch.
    1. The `test...` files will go to the `test` branch.
 
@@ -429,9 +429,10 @@ Let's create a commit to `test` branch:
 
 ### Do It Yourself
 
-1. Reset the configuration:
+1. Go back to the repository root (the previous steps left you inside `c-bye/`) and reset the configuration:
 
    ```console
+   cd ..
    ./reset-all.sh
    ```
 
@@ -471,7 +472,7 @@ Let's create a commit to `test` branch:
    There are a lot of files.
    We want to add them as 3 separate commits in 3 separate branches.
 
-   1. The `bye.cpp`, `Makefile`, `Makefile.uk`, `Config.uk`, `fc...`, `xen...`, `README.md` files will go to the `base` branch.
+   1. The `bye.cpp`, `Makefile`, `Makefile.uk`, `Config.uk`, `fc...`, `xen...`, `README.md`, `.gitignore` files will go to the `base` branch.
    1. The `defconfig...`, `build...`, `run...`, `README.scripts.md` files will go to the `scripts` branch.
    1. The `test...` files will go to the `test` branch.
 
@@ -502,7 +503,7 @@ Let's create a commit to `test` branch:
    There are a lot of files.
    We want to add them as 3 separate commits in 3 separate branches.
 
-   1. The `bye.py`, `Makefile`, `Makefile.uk`, `Config.uk`, `fc...`, `xen...`, `README.md` files will go to the `base` branch.
+   1. The `bye.py`, `Makefile`, `Makefile.uk`, `Config.uk`, `fc...`, `xen...`, `README.md`, `.gitignore` files will go to the `base` branch.
    1. The `defconfig...`, `build...`, `run...`, `README.scripts.md` files will go to the `scripts` branch.
    1. The `test...` files will go to the `test` branch.
 
@@ -630,14 +631,21 @@ At this point, the `scripts` branch is based on the `base` branch.
 And the `test` branch is based on the `scripts` branch.
 
 What we do not like, however, is that the commits in the `scripts` and the `test` branch are not in the correct order.
+The commits are grouped by *kind* (first all the `Introduce ...` commits, then all the `Add scripts` commits), instead of being grouped by *program*.
 
-In the `scripts` branch the commits are (top-to-bottom):
+Let's fix the `test` branch, which is the one with all the commits:
+
+```console
+git checkout test
+```
+
+The `9` commits you added are (top-to-bottom):
 
 - python3-bye: Add scripts
-- Introduce Python3 Bye
 - cpp-bye: Add scripts
-- Introduce C++ Bye
 - c-bye: Add scripts
+- Introduce Python3 Bye
+- Introduce C++ Bye
 - Introduce C Bye
 - python3-bye: Add test scripts
 - cpp-bye: Add test scripts
@@ -650,7 +658,7 @@ git log
 git log --oneline
 ```
 
-The order we want is (top-to-bottom):
+The order we want is (top-to-bottom), with the three commits of each program next to each other:
 
 - python3-bye: Add test scripts
 - python3-bye: Add scripts
@@ -658,9 +666,9 @@ The order we want is (top-to-bottom):
 - cpp-bye: Add test scripts
 - cpp-bye: Add scripts
 - Introduce C++ Bye
+- c-bye: Add test scripts
 - c-bye: Add scripts
 - Introduce C Bye
-- c-bye: Add test scripts
 
 So, to update the commit history, follow the steps below:
 
@@ -672,6 +680,10 @@ So, to update the commit history, follow the steps below:
    ```
 
    You are now in a custom editor mode where you can update the commits.
+
+   > [!NOTE]
+   > The editor lists the commits **oldest first**, i.e. in the reverse order of `git log`.
+   > The last line of the list is the commit shown at the top of `git log`.
 
 1. Move the commits (cut & paste) to get to the new commit history.
    Do this by cutting and pasting the lines in the commit history.
@@ -688,7 +700,13 @@ git log --oneline
 
 ### Do It Yourself
 
-Edit the commit history on the `test` branch so the commits are in the correct order, just like they are on the `scripts` branch.
+Do the same on the `scripts` branch, so its commits are also grouped by program.
+The `scripts` branch has only `6` new commits (there are no `Add test scripts` commits on it), so use:
+
+```console
+git checkout scripts
+git rebase -i HEAD~6
+```
 
 # GitHub
 
@@ -916,13 +934,17 @@ Unlike a branch, a tag does not move - it always points to the same commit.
    git show v1.0
    ```
 
-1. Push the tag to GitHub (tags are **not** pushed by `git push` by default):
+1. Push the tag to your GitHub repository (tags are **not** pushed by `git push` by default):
 
    ```console
-   git push origin v1.0
+   git push upstream v1.0
    ```
 
-   To push all your tags at once, use `git push origin --tags`.
+   To push all your tags at once, use `git push upstream --tags`.
+
+   > [!NOTE]
+   > We push to `upstream`, the repository you created with `./gh-create-repo.sh`.
+   > `origin` is the `rosedu/workshop-github` repository, which you cannot write to.
 
 1. In the web view of your GitHub repository, go to the `Tags` / `Releases` section.
    You will see the `v1.0` tag.
@@ -932,7 +954,7 @@ To delete a tag (locally and on GitHub), use:
 
 ```console
 git tag -d v1.0
-git push origin --delete v1.0
+git push upstream --delete v1.0
 ```
 
 ## Collaborate with GitHub
