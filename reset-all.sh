@@ -1,12 +1,18 @@
 #!/bin/sh
 
 # Usage:
-#   ./reset.sh            # local reset only
-#   ./reset.sh --github   # full GitHub reset
+#   ./reset-all.sh            # local reset only
+#   ./reset-all.sh --github   # full GitHub reset
 
-if [ "$1" = "--github" ] && ! command -v gh > /dev/null 2>&1; then
-    echo "gh could not be found" >&2
-    exit 1
+if [ "$1" = "--github" ]; then
+    if ! command -v gh > /dev/null 2>&1; then
+        echo "gh could not be found" >&2
+        exit 1
+    fi
+    if ! command -v jq > /dev/null 2>&1; then
+        echo "jq could not be found; install it with: sudo apt install jq" >&2
+        exit 1
+    fi
 fi
 
 reset_branch_to_remote()
@@ -42,7 +48,7 @@ clean_branch base
 clean_branch main
 
 if [ "$1" = "--github" ]; then
-    git remote rm true-origin 2>/dev/null
+    git remote rm true-origin > /dev/null 2>&1
     git remote add true-origin https://github.com/rosedu/workshop-github
 
     git fetch true-origin
