@@ -99,6 +99,27 @@ git checkout test
 git checkout main
 ```
 
+### Branch Structure
+
+Before going on, it is worth knowing how this repository is laid out, because it is unusual:
+
+- `main` holds the workshop itself: this `README.md` and the helper scripts.
+- `base`, `scripts` and `test` hold the application code we work on, taken from `unikraft/catalog-core`.
+
+These are **two unrelated histories**. `main` has its own root commit, and `base`, `scripts` and `test` share a different one.
+You can see it for yourself:
+
+```console
+git merge-base main base
+```
+
+The command prints nothing: there is no commit that is an ancestor of both.
+
+Two consequences to keep in mind for the whole workshop:
+
+1. `support/`, with the archives we unpack, exists **only on `main`**. On the other three branches it is not there.
+1. A branch created from `base`, `scripts` or `test` can never be merged into `main`, and vice versa. Always check which branch you are on before starting something new.
+
 1. Create the setup:
 
    ```console
@@ -765,6 +786,23 @@ Let's now create pull requests on our GitHub repository.
 A pull request is created from a series of commits in a branch.
 
 We do the steps:
+
+1. Make sure you are on the `main` branch:
+
+   ```console
+   git checkout main
+   git status
+   ```
+
+   > [!IMPORTANT]
+   > Do not skip this.
+   > The previous exercises leave you on `base`, `scripts` or `test`, and a pull request branch created from one of those cannot be merged into `main`:
+   >
+   > - Those three branches have a commit history of their own, with **no commit in common** with `main` (see ["Branch Structure"](#branch-structure)).
+   >   GitHub will tell you `There isn't anything to compare. main and add-c-bye are entirely different commit histories.`
+   > - They also do not contain the `support/` directory, so the `unzip` below fails with `cannot find or open support/c-bye.zip`.
+   >
+   > If in doubt, run `./reset-all.sh`, which leaves you on `main`.
 
 1. Create a branch for the new pull request:
 
